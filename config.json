@@ -1,0 +1,13 @@
+{
+    "api_key": "dstNUzcI29uBYBBxwogzs2u4dy7mWu24",
+    "base_url": "https://api.sightmap.com/v1/",
+    "headers": {
+        "Authorization": "dstNUzcI29uBYBBxwogzs2u4dy7mWu24",
+        "Content-Type": "application/json"
+    },
+    "endpoints": {
+        "get_sightmap_data": "assets",
+        "list_properties": "properties",
+        "get_property_details": "properties/{property_id}"
+    }
+}
