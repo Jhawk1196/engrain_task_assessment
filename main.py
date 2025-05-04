@@ -19,7 +19,8 @@ def process_info():
     API_Data = get_sightmap_data()
     unit_data = API_Data['units']
     expense_data = API_Data['expenses']
-    required_fees = 0
+    init_required_fees = 0
+    mon_required_fees = 0
     mon_pet_rent = 0
     init_rent_pet = 0
 
@@ -38,7 +39,9 @@ def process_info():
                 highest_price[element + ' With Minimum Storage'] = highPrice + float(fee['min_amount'])
                 highest_price[element + ' With Maximum Storage'] = highPrice + float(fee['max_amount'])
         if frequency_key == 'monthly' and fee['is_required']:
-            required_fees += float(fee['amount'])
+            mon_required_fees += float(fee['amount'])
+        if frequency_key == 'one_time' and fee['is_required']:
+            init_required_fees += float(fee['amount'])
 
     for item in sql_data:
         floor_plan_key = item['floor_plan']
@@ -46,7 +49,7 @@ def process_info():
             temp_dict = sql_dict[floor_plan_key]
             temp_dict['price'] = item['unit_price'] + temp_dict['price']
             temp_list = all_rent_dict[floor_plan_key]
-            temp_list.append(item['unit_price'] + required_fees)
+            temp_list.append(item['unit_price'] + mon_required_fees)
             all_rent_dict[floor_plan_key] = temp_list
             temp_dict['amount'] = 1 + temp_dict['amount']
             sql_dict[floor_plan_key] = temp_dict
@@ -80,7 +83,7 @@ def process_info():
 
     for rent in sql_dict:
         temp_dict = sql_dict[rent]
-        rent_value = round((temp_dict['price'] / temp_dict['amount']), 2) + required_fees
+        rent_value = round((temp_dict['price'] / temp_dict['amount']), 2) + mon_required_fees
         avg_rent.append(rent_value)
         print('\nTotal Amount of ' + str(rent) + " units is " + str(temp_dict['amount']))
     floor_plan_index = 0
@@ -92,22 +95,26 @@ def process_info():
         print("\nAverage price per sq. foot of " + floor_plans[floor_plan_index] + " units is " + str(price_per_sqFt))
         floor_plan_index += 1
 
-    init_rent_pet += avg_rent[0]
+    print("\nRequired Monthly Fees: " + str(mon_required_fees))
+    print("\nInitial Fees at move in: " + str(init_required_fees))
+
+    init_rent_pet += avg_rent[0] + init_required_fees
     mon_pet_rent += avg_rent[0]
 
     print("\nAverage First Month's Rent with Pet for S1 floor plans: " + str(round(init_rent_pet, 2)))
     print("\nAverage Monthly Rent with Pet for S1 floor plans: " + str(round(mon_pet_rent, 2)))
 
     highest_list = list(highest_price.values())
-    highest_total = max(highest_list) + required_fees + 200
+    highest_total = max(highest_list) + mon_required_fees + 200
     lowest_list = list(lowest_price.values())
     lowest_total = min(lowest_list)
     for avg in floor_plans:
         print("\nAverage Price of " + avg + " is: " + str(avg_rent[floor_plans.index(avg)]))
     for lp in lowest_price:
-        print("\nLowest Price of " + lp + " is: " + str(lowest_price[lp] + required_fees))
+        print("\nLowest Price of " + lp + " is: " + str(lowest_price[lp] + mon_required_fees))
     for hp in highest_price:
-        print("\nHighest Price of " + hp + " is: " + str(highest_price[hp] + required_fees))   
+        print("\nHighest Price of " + hp + " is: " + str(highest_price[hp] + mon_required_fees))
+        print("\nRange of " + hp + " floor plans is: " + str((highest_price[hp] + mon_required_fees) - (lowest_price[hp] + mon_required_fees)))   
              
     x_values = []
     y_values = []
