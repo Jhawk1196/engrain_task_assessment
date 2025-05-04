@@ -13,6 +13,7 @@ def process_info():
     api_dict = {}
     floor_plans = []
     avg_rent = []
+    building_amount = {}
 
     sql_data = access_table()
     API_Data = get_sightmap_data()
@@ -70,6 +71,12 @@ def process_info():
             api_dict[unit_floor_plan] = temp_dict_2
         else:
             api_dict[unit_floor_plan] = {'area': unit['area'], 'amount' : 1}
+        if unit['building_id'] in building_amount:
+            building_amount[unit['building_id']] += 1
+        else:
+            building_amount[unit['building_id']] = 1
+        
+    print(building_amount)
 
     for rent in sql_dict:
         temp_dict = sql_dict[rent]
@@ -80,6 +87,7 @@ def process_info():
     for area in api_dict:
         temp_dict_2 = api_dict[area]
         area_value = round((temp_dict_2['area'] / temp_dict_2['amount']), 2)
+        print("\nAverage sq ft. of " + floor_plans[floor_plan_index] + " is: " + str(area_value))
         price_per_sqFt = round((avg_rent[floor_plan_index] / area_value), 2)
         print("\nAverage price per sq. foot of " + floor_plans[floor_plan_index] + " units is " + str(price_per_sqFt))
         floor_plan_index += 1
